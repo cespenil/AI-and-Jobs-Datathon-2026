@@ -20,6 +20,7 @@ print(df.describe())  #provides summary statistics of the dataset
 #df["job_title"].unique() #checks what values are in job_title (categorical variable)
 #print(df["country"].unique()) #checks what values are in country (categorical variable)
 print(df.dtypes)  #checks data types of each column
+print(df.isnull().sum())  #double checks if there are any remaining missing values
 #print(df["salary"].min())
 #print(df["salary"].max())
 #print(df["ai_risk_score"].describe())   this one is not based on 0 or 1 but has range of values such as mean, min, ect
