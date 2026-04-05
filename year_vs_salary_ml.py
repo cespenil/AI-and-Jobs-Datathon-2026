@@ -68,3 +68,20 @@ plt.legend()
 plt.grid(True)
 
 plt.show()
+
+# prediction model understanding
+plt.figure(figsize=(6,6))
+
+plt.scatter(y_test, y_test_pred, alpha=0.6)
+
+# perfect prediction line
+plt.plot([y_test.min(), y_test.max()],
+         [y_test.min(), y_test.max()],
+         linestyle='--')
+
+plt.xlabel("Actual Salary")
+plt.ylabel("Predicted Salary")
+plt.title("Actual vs Predicted Salary")
+
+plt.grid(True)
+plt.show()
