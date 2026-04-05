@@ -1,118 +1,51 @@
 from cleaning import df
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+import numpy as np
 
-'''
-df_numeric_features = df[['ai_risk_score', 'salary']]
+#define safe features (independent of target)
+features = ['salary']
+X = df[features]
+y = df['ai_risk_score']
 
 #scale features
 scaler = StandardScaler()
-df_numeric_scaled = scaler.fit_transform(df_numeric_features)
-df_numeric_scaled = pd.DataFrame(df_numeric_scaled, columns=['ai_risk_score', 'salary'])
+X_scaled = scaler.fit_transform(X)
 
-#create new features 
-df_numeric_scaled['risk_per_salary'] = df_numeric_scaled['ai_risk_score'] / (df_numeric_scaled['salary'] + 1e-6)
-df_numeric_scaled['ai_risk_vs_salary'] = df_numeric_scaled['ai_risk_score'] * df_numeric_scaled['salary']
+#Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-# Define features and target variable
-X = df_numeric_scaled[['salary', 'risk_per_salary', 'ai_risk_vs_salary']]  # exclude ai_risk_score here
-y = df_numeric_scaled['ai_risk_score']  # target remains ai_risk_score 
+#Train model
+models = {
+    "LinearRegression": LinearRegression(),
+    "Ridge": Ridge(alpha=1.0),
+    "Lasso": Lasso(alpha=0.01),
+    "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42)
+}
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Train linear regression model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-# Make predictions
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-print(f"Mean Squared Error: {mse}")
-print(f"R^2 Score: {r2}")
-
-'''
-'''
-# 1. Correlation between AI risk score and salary
-corr_salary = df['ai_risk_score'].corr(df['salary'])
-print(f"Correlation between AI risk score and salary: {corr_salary:.2f}")
-
-# 2. Scatter plot: AI risk score vs Salary
-plt.scatter(df['salary'], df['ai_risk_score'], alpha=0.5)
-plt.xlabel('Salary')
-plt.ylabel('AI Risk Score')
-plt.title('AI Risk Score vs Salary')
-plt.show()
-
-# 3. Correlations of AI risk score with other numeric variables
-numeric_cols = ['salary', 'skill_demand_score', 'job_openings', 'year', 'job_survival_class']
-corrs = df[numeric_cols + ['ai_risk_score']].corr()['ai_risk_score'].drop('ai_risk_score')
-print("\nCorrelation of AI risk score with other numeric variables:")
-print(corrs)
-
-# 4. Average AI risk score by experience level (categorical example)
-avg_risk_by_exp = df.groupby('experience_level')['ai_risk_score'].mean()
-print("\nAverage AI risk score by experience level:")
-print(avg_risk_by_exp)
-
-# 5. (Optional) Bar plot for categorical variable
-avg_risk_by_exp.plot(kind='bar', title='Average AI Risk Score by Experience Level')
-plt.ylabel('Average AI Risk Score')
-plt.show()
-'''
-# MLM 2 - Skills vs Salary
-import pandas as pd
-
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
-import matplotlib.pyplot as plt
-#importing the feature-enineered dataframe
-from Feature_Engineering_1_modified import df_skills_final
-
-#select features and target
-X = df_skills_final[['primary_skill_encoded', 'skill_popularity', 'skill_salary_ratio', 'skill_vs_salary']]
-y = df_skills_final['salary']
-
-# create a Linear Regression model
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-#fit the model on the training data
-lr_model = LinearRegression()
-
-#learned patters from the training data
-lr_model.fit(X_train, y_train)
-
-#prediction based of the previous data
-y_pred = lr_model.predict(X_test)
-
-#measures prediction error, lower the better
-mse = mean_squared_error(y_test, y_pred)
-
-#the R^2 score shows how much variance the model explains
-r2 = r2_score(y_test, y_pred)
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    print(f"{name} -> MSE: {mse:.4f}, R2: {r2:.4f}")
+    if name == "RandomForest":
+        rf_model = model
+        rf_pred = y_pred 
 
 if __name__ == '__main__':
-    print('Mean Squared Error:', mse)
-    print('R2 Score:', r2)
+    print(f"Mean Squared Error: {mse}")
+    print(f"R2 score: {r2}")
 
-
-    plt.scatter(y_test, y_pred)
-
-    # regression reference line (perfect predictions)
-    plt.plot([y_test.min(), y_test.max()],
-            [y_test.min(), y_test.max()])
-
-    plt.xlabel("Actual Salary")
-    plt.ylabel("Predicted Salary")
-    plt.title("Linear Regression Model: Actual vs Predicted Salary")
-
+    plt.figure(figsize=(6,6))
+    plt.scatter(y_test, rf_pred, alpha=0.5)
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')  # perfect prediction line
+    plt.xlabel("Actual AI Risk Score")
+    plt.ylabel("Predicted AI Risk Score")
+    plt.title("Random Forest Predictions")
     plt.show()
