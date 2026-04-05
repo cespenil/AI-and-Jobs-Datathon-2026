@@ -1,6 +1,7 @@
-# ml_example.py
+# job_AI_risk_ml.py
 
 from cleaning import df
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -46,3 +47,20 @@ coefficients = pd.DataFrame({
 })
 print("\nFeature Coefficients:")
 print(coefficients)
+
+# Visualizations for ML using matplotlib
+plt.figure(figsize=(8, 6))
+
+plt.scatter(y_test, y_pred, alpha=0.6)
+
+# perfect prediction line
+plt.plot([y_test.min(), y_test.max()],
+         [y_test.min(), y_test.max()],
+         linestyle='--')
+
+plt.xlabel("Actual Risk-Adjusted Openings (Millions)")
+plt.ylabel("Predicted Risk-Adjusted Openings (Millions)")
+plt.title("Actual vs Predicted (Job Opportunity Model)")
+
+plt.grid(True)
+plt.show()
