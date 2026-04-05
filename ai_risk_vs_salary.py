@@ -38,7 +38,7 @@ print(f"Mean Squared Error: {mse}")
 print(f"R^2 Score: {r2}")
 
 '''
-
+'''
 # 1. Correlation between AI risk score and salary
 corr_salary = df['ai_risk_score'].corr(df['salary'])
 print(f"Correlation between AI risk score and salary: {corr_salary:.2f}")
@@ -65,3 +65,54 @@ print(avg_risk_by_exp)
 avg_risk_by_exp.plot(kind='bar', title='Average AI Risk Score by Experience Level')
 plt.ylabel('Average AI Risk Score')
 plt.show()
+'''
+# MLM 2 - Skills vs Salary
+import pandas as pd
+
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+#importing the feature-enineered dataframe
+from Feature_Engineering_1_modified import df_skills_final
+
+#select features and target
+X = df_skills_final[['primary_skill_encoded', 'skill_popularity', 'skill_salary_ratio', 'skill_vs_salary']]
+y = df_skills_final['salary']
+
+# create a Linear Regression model
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+#fit the model on the training data
+lr_model = LinearRegression()
+
+#learned patters from the training data
+lr_model.fit(X_train, y_train)
+
+#prediction based of the previous data
+y_pred = lr_model.predict(X_test)
+
+#measures prediction error, lower the better
+mse = mean_squared_error(y_test, y_pred)
+
+#the R^2 score shows how much variance the model explains
+r2 = r2_score(y_test, y_pred)
+
+if __name__ == '__main__':
+    print('Mean Squared Error:', mse)
+    print('R2 Score:', r2)
+
+
+    plt.scatter(y_test, y_pred)
+
+    # regression reference line (perfect predictions)
+    plt.plot([y_test.min(), y_test.max()],
+            [y_test.min(), y_test.max()])
+
+    plt.xlabel("Actual Salary")
+    plt.ylabel("Predicted Salary")
+    plt.title("Linear Regression Model: Actual vs Predicted Salary")
+
+    plt.show()
